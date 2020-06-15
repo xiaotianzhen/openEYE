@@ -164,7 +164,9 @@ class _RecommendPageState extends State<RecommendPage> {
               print("horizontalScrollCard");
               ScrollcardEntity scrollcardEntity = ScrollcardEntity.fromJson(
                   json.decode(json.encode(dataList[f]).toString()));
-              items.add(scrollcardEntity);
+              if(scrollcardEntity.data.itemList[0].data.bgPicture!=null){
+                items.add(scrollcardEntity);
+              }
               break;
             case "communityColumnsCard":
               print("communityColumnsCard");
