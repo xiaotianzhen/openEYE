@@ -1,4 +1,3 @@
-
  在玩安卓上有款组件化开源app的项目，一款模仿 Eyepetizer | 开眼视频的 开源app,这款app设计风格特别喜欢的，比较简洁，美观，然后最近又在学flutter的知识，于是就写了一款flutter版本的开源短视频，效果也是听不错的，废话不多说，先上效果图。
 
 先附上项目地址：[https://github.com/xiaotianzhen/openEYE](https://github.com/xiaotianzhen/openEYE)
@@ -21,3 +20,4 @@
 
 参考链接（包含本项目的api）
 [https://www.jianshu.com/p/1f6b0cfd4606](https://www.jianshu.com/p/1f6b0cfd4606)
+
