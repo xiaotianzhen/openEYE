@@ -23,19 +23,85 @@ class NominatePage extends StatefulWidget {
 
 class _NominatePageState extends State<NominatePage> {
   List<dynamic> items;
-
+  ScrollController scrollController = new ScrollController();
+  bool isRefreshing = false;
+  bool isLoadingMore = false;
+  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
+  new GlobalKey<RefreshIndicatorState>();
+  var nextPageUrl="";
   @override
   void initState() {
     super.initState();
     items = new List<dynamic>();
+    scrollController.addListener(_updateScrollPosition);
     loadData();
+  }
+
+  void _updateScrollPosition(){
+     bool isBottom=scrollController.position.pixels==scrollController.position.maxScrollExtent;
+     if(!isRefreshing&&isBottom&&!isLoadingMore){
+        setState(() {
+          isRefreshing=false;
+          isLoadingMore=true;
+          _loadMore();
+        });
+     }
+  }
+
+  Future<Null> _loadMore() async{
+    await new Future.delayed(new Duration(seconds: 1));
+    loadData();
+    return null;
+  }
+
+  Future<Null> _handlerRefresh() async{
+    if(!isLoadingMore){
+      setState(() {
+        isLoadingMore=false;
+        isRefreshing=true;
+      });
+    }
+
+    await new Future.delayed(new Duration(seconds: 1));
+    items.clear();
+    loadData();
+    scrollController.jumpTo(0.0);
+    return null;
+  }
+
+  @override
+  void dispose() {
+    scrollController.removeListener(_updateScrollPosition);
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: new ListView.builder(
+      body:new RefreshIndicator(
+          onRefresh: ()=>_handlerRefresh(),
+          child: new ListView.builder(
+        key: _refreshIndicatorKey,
+        physics: const AlwaysScrollableScrollPhysics(),
+        controller: scrollController,
         itemBuilder: (BuildContext context, int index) {
+
+
+          if (index == items.length) {
+            return new Container(
+              alignment: Alignment.center,
+              padding: EdgeInsets.all(5.0),
+              child: new SizedBox(
+                height: 40.0,
+                width: 40.0,
+                child: new Opacity(
+                  opacity: isLoadingMore?1.0:0.0,
+                  child: new CircularProgressIndicator(),
+                ),
+              ),
+            );
+          }
+
           final item = items[index];
           if (item is TitileViewModel) {
             print("TitileViewModel");
@@ -105,17 +171,17 @@ class _NominatePageState extends State<NominatePage> {
                         ),
                         new Expanded(
                             child: new Container(
-                          padding: EdgeInsets.only(
-                            left: 10.0,
-                          ),
-                          child: new Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: <Widget>[
-                              new Text(item.title),
-                              new Text(item.description),
-                            ],
-                          ),
-                        )),
+                              padding: EdgeInsets.only(
+                                left: 10.0,
+                              ),
+                              child: new Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  new Text(item.title),
+                                  new Text(item.description),
+                                ],
+                              ),
+                            )),
                         new Image.asset("images/common_share.png",
                             fit: BoxFit.cover),
                       ],
@@ -168,32 +234,32 @@ class _NominatePageState extends State<NominatePage> {
                   ),
                   new Expanded(
                       child: new Container(
-                    height: 120,
-                    child: new Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: <Widget>[
-                        new Expanded(
-                            flex: 1,
-                            child: new Text(
-                              item.title,
-                              maxLines: 2,
-                              style: TextStyle(
-                                  fontSize: 14,
-                                  decoration: TextDecoration.none),
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.start,
-                            )),
-                        new Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        height: 120,
+                        child: new Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: <Widget>[
-                            new Text(item.description),
-                            new Image.asset("images/common_share.png",
-                                fit: BoxFit.cover),
+                            new Expanded(
+                                flex: 1,
+                                child: new Text(
+                                  item.title,
+                                  maxLines: 2,
+                                  style: TextStyle(
+                                      fontSize: 14,
+                                      decoration: TextDecoration.none),
+                                  overflow: TextOverflow.ellipsis,
+                                  textAlign: TextAlign.start,
+                                )),
+                            new Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: <Widget>[
+                                new Text(item.description),
+                                new Image.asset("images/common_share.png",
+                                    fit: BoxFit.cover),
+                              ],
+                            )
                           ],
-                        )
-                      ],
-                    ),
-                  )),
+                        ),
+                      )),
                 ],
               ),
             );
@@ -220,8 +286,8 @@ class _NominatePageState extends State<NominatePage> {
             return new Text("数据出错");
           }
         },
-        itemCount: items != null ? items.length : 0,
-      ),
+        itemCount: items != null ? items.length +1: 0,
+      )) ,
     );
   }
 
@@ -235,12 +301,18 @@ class _NominatePageState extends State<NominatePage> {
       BaseOptions options =
           BaseOptions(headers: headers, responseType: ResponseType.plain);
       Dio dio = new Dio(options);
-      Response response = await dio.get(BaseUrl.url);
+      Response response;
+      if(isLoadingMore&&nextPageUrl.isNotEmpty){
+        response = await dio.get(nextPageUrl);
+      }else{
+        response = await dio.get(BaseUrl.url);
+      }
       print("responsecode: " + response.statusCode.toString());
       setState(() {
         String result = response.data.toString();
         Map<String, dynamic> data = json.decode(result);
         print(data["itemList"].toString());
+        nextPageUrl= json.decode(json.encode(data["nextPageUrl"]).toString());
         List itemList = json.decode(json.encode(data["itemList"]).toString());
 
         itemList.asMap().keys.map((f) {
@@ -278,6 +350,8 @@ class _NominatePageState extends State<NominatePage> {
               break;
           }
         }).toList();
+        isLoadingMore=false;
+        isRefreshing=false;
       });
     } catch (e) {
       print(e);

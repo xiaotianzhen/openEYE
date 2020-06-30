@@ -34,22 +34,87 @@ class _DisCoverPageState extends State<DisCoverPage> {
     loadData();
   }
 
+  Future<Null> _handlerRefresh() async {
+    //模拟耗时5秒
+    await new Future.delayed(new Duration(seconds: 1));
+    items.clear();
+    loadData();
+
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: new ListView.builder(
-        itemBuilder: (BuildContext context, int index) {
-          final item = items[index];
-          if (item is TopBeanViewModel) {
-            return new Container(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
-              child: new Image.network(item.bannerUrl),
-            );
-          } else if (item is CategoryCartEntity) {
-            return new Container(
+
+      body:new RefreshIndicator(
+        //刷新方法
+         onRefresh: () => _handlerRefresh(),
+        child:new ListView.builder(
+          physics: const AlwaysScrollableScrollPhysics(),
+          itemBuilder: (BuildContext context, int index) {
+            final item = items[index];
+            if (item is TopBeanViewModel) {
+              return new Container(
+                padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                child: new Image.network(item.bannerUrl),
+              );
+            } else if (item is CategoryCartEntity) {
+              return new Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: new Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: <Widget>[
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: <Widget>[
+                          new Text(
+                            item.data.header.title,
+                            style: new TextStyle(
+                              fontSize: 18.0,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                          new Container(
+                            child: new Row(
+                              children: <Widget>[
+                                new Text(item.data.header.rightText == null
+                                    ? ""
+                                    : item.data.header.rightText),
+                                new Image.asset("images/common_action_right.png"),
+                              ],
+                            ),
+                          )
+                        ],
+                      ),
+                      Container(
+                        padding: EdgeInsets.only(top: 10.0),
+                        height: 200.0,
+                        child: GridView.builder(
+                          //physics: new NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            scrollDirection: Axis.horizontal,
+                            gridDelegate:
+                            SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 2,
+                                mainAxisSpacing: 10.0,
+                                crossAxisSpacing: 10.0,
+                                childAspectRatio: 0.9),
+                            itemCount: item.data.itemList.length,
+                            itemBuilder: (context, index) {
+                              return new Container(
+                                child: new Image.network(
+                                  item.data.itemList[index].data.image,
+                                ),
+                              );
+                            }),
+                      )
+                    ],
+                  ));
+            } else if (item is SubjectCardEntity) {
+              return new Container(
                 padding: EdgeInsets.all(10.0),
                 child: new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: <Widget>[
                     new Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -74,39 +139,35 @@ class _DisCoverPageState extends State<DisCoverPage> {
                       ],
                     ),
                     Container(
-                      padding: EdgeInsets.only(top: 10.0),
-                      height: 200.0,
+                      height: 180.0,
                       child: GridView.builder(
-                          //physics: new NeverScrollableScrollPhysics(),
+                          physics: new NeverScrollableScrollPhysics(),
                           shrinkWrap: true,
-                          scrollDirection: Axis.horizontal,
-                          gridDelegate:
-                              SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  mainAxisSpacing: 10.0,
-                                  crossAxisSpacing: 10.0,
-                                  childAspectRatio: 0.9),
+                          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 2,
+                            mainAxisSpacing: 10.0,
+                            crossAxisSpacing: 10.0,
+                            childAspectRatio: 2,
+                          ),
                           itemCount: item.data.itemList.length,
                           itemBuilder: (context, index) {
-                            return new Container(
-                              child: new Image.network(
-                                item.data.itemList[index].data.image,
-                              ),
+                            return new Image.network(
+                              item.data.itemList[index].data.image,
+                              fit: BoxFit.cover,
                             );
                           }),
                     )
                   ],
-                ));
-          } else if (item is SubjectCardEntity) {
-            return new Container(
-              padding: EdgeInsets.all(10.0),
-              child: new Column(
-                children: <Widget>[
-                  new Row(
+                ),
+              );
+            } else if (item is TitileViewModel) {
+              return new Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: new Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: <Widget>[
                       new Text(
-                        item.data.header.title,
+                        item.title,
                         style: new TextStyle(
                           fontSize: 18.0,
                           fontWeight: FontWeight.bold,
@@ -115,190 +176,144 @@ class _DisCoverPageState extends State<DisCoverPage> {
                       new Container(
                         child: new Row(
                           children: <Widget>[
-                            new Text(item.data.header.rightText == null
-                                ? ""
-                                : item.data.header.rightText),
-                            new Image.asset("images/common_action_right.png"),
+                            new Text(
+                                item.actionTitle == null ? "" : item.actionTitle),
+                            new Image.asset("images/common_action_right.png")
                           ],
                         ),
                       )
                     ],
-                  ),
-                  Container(
-                    height: 180.0,
-                    child: GridView.builder(
-                        physics: new NeverScrollableScrollPhysics(),
-                        shrinkWrap: true,
-                        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                          crossAxisCount: 2,
-                          mainAxisSpacing: 10.0,
-                          crossAxisSpacing: 10.0,
-                          childAspectRatio: 2,
-                        ),
-                        itemCount: item.data.itemList.length,
-                        itemBuilder: (context, index) {
-                          return new Image.network(
-                            item.data.itemList[index].data.image,
-                            fit: BoxFit.cover,
-                          );
-                        }),
-                  )
-                ],
-              ),
-            );
-          } else if (item is TitileViewModel) {
-            return new Container(
-                padding: EdgeInsets.all(10.0),
-                child: new Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: <Widget>[
-                    new Text(
-                      item.title,
-                      style: new TextStyle(
-                        fontSize: 18.0,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    new Container(
-                      child: new Row(
-                        children: <Widget>[
-                          new Text(
-                              item.actionTitle == null ? "" : item.actionTitle),
-                          new Image.asset("images/common_action_right.png")
-                        ],
-                      ),
-                    )
-                  ],
-                ));
-          } else if (item is VideoCardViewModel) {
-            VideoDetialViewModel videoDetailData = new VideoDetialViewModel(
-                coverUrl: item.coverUrl,
-                videoTime: item.videoTime,
-                title: item.title,
-                description: item.description,
-                authorUrl: item.authorUrl,
-                userDescription: item.userDescription,
-                nickName: item.nickName,
-                videoDescription: item.videoDescription,
-                playerUrl: item.playerUrl,
-                blurredUrl: item.blurredUrl,
-                videoId: item.videoId,
-                collectionCount: item.collectionCount,
-                shareCount: item.collectionCount);
+                  ));
+            } else if (item is VideoCardViewModel) {
+              VideoDetialViewModel videoDetailData = new VideoDetialViewModel(
+                  coverUrl: item.coverUrl,
+                  videoTime: item.videoTime,
+                  title: item.title,
+                  description: item.description,
+                  authorUrl: item.authorUrl,
+                  userDescription: item.userDescription,
+                  nickName: item.nickName,
+                  videoDescription: item.videoDescription,
+                  playerUrl: item.playerUrl,
+                  blurredUrl: item.blurredUrl,
+                  videoId: item.videoId,
+                  collectionCount: item.collectionCount,
+                  shareCount: item.collectionCount);
 
-            return new Container(
-                padding: EdgeInsets.all(10.0),
-                child: new IntrinsicHeight(
-                  child: new Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: <Widget>[
-                      new GestureDetector(
-                        child: new Image.network(
-                          item.coverUrl,
-                          width: 160.0,
-                          height: 120.0,
+              return new Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: new IntrinsicHeight(
+                    child: new Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: <Widget>[
+                        new GestureDetector(
+                          child: new Image.network(
+                            item.coverUrl,
+                            width: 160.0,
+                            height: 120.0,
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                new VideoDetailPage(videoDetailData),
+                              ),
+                            );
+                          },
                         ),
-                        onTap: () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  new VideoDetailPage(videoDetailData),
-                            ),
-                          );
-                        },
-                      ),
-                      new Expanded(
-                          child: new Container(
-                        padding: EdgeInsets.only(left: 10.0),
-                        child: new Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
+                        new Expanded(
+                            child: new Container(
+                              padding: EdgeInsets.only(left: 10.0),
+                              child: new Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: <Widget>[
+                                  new Expanded(
+                                      flex: 1,
+                                      child: new Text(
+                                        item.title,
+                                        maxLines: 2,
+                                        style: TextStyle(
+                                            fontSize: 14,
+                                            decoration: TextDecoration.none),
+                                        overflow: TextOverflow.ellipsis,
+                                        textAlign: TextAlign.start,
+                                      )),
+                                  new Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: <Widget>[
+                                      new Expanded(
+                                          child: new Text(
+                                            item.description,
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          )),
+                                      new Image.asset("images/common_share.png"),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )),
+                      ],
+                    ),
+                  ));
+            } else if (item is BriefCardViewModel) {
+              return new Column(
+                children: <Widget>[
+                  new Container(
+                      padding: EdgeInsets.all(10.0),
+                      child: new IntrinsicHeight(
+                        child: new Row(
                           children: <Widget>[
+                            new Image.network(
+                              item.coverUrl,
+                              width: 70.0,
+                              height: 70.0,
+                            ),
                             new Expanded(
-                                flex: 1,
-                                child: new Text(
-                                  item.title,
-                                  maxLines: 2,
-                                  style: TextStyle(
-                                      fontSize: 14,
-                                      decoration: TextDecoration.none),
-                                  overflow: TextOverflow.ellipsis,
-                                  textAlign: TextAlign.start,
+                                child: new Container(
+                                  padding: EdgeInsets.only(left: 10.0),
+                                  child: new Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: <Widget>[
+                                      new Expanded(
+                                          flex: 1,
+                                          child: new Text(
+                                            item.title,
+                                            maxLines: 2,
+                                            style: TextStyle(
+                                                fontSize: 14,
+                                                decoration: TextDecoration.none),
+                                            overflow: TextOverflow.ellipsis,
+                                            textAlign: TextAlign.start,
+                                          )),
+                                      new Text(item.description),
+                                    ],
+                                  ),
                                 )),
-                            new Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: <Widget>[
-                                new Expanded(
-                                    child: new Text(
-                                  item.description,
-                                  overflow: TextOverflow.ellipsis,
-                                  maxLines: 1,
-                                )),
-                                new Image.asset("images/common_share.png"),
-                              ],
-                            )
+                            new Text(("+关注"))
                           ],
                         ),
                       )),
-                    ],
+                  Divider(
+                    height: 1.0,
+                    indent: 10.0,
+                    endIndent: 10.0,
+                    color: Colors.grey,
                   ),
-                ));
-          } else if (item is BriefCardViewModel) {
-            return new Column(
-              children: <Widget>[
-                new Container(
-                    padding: EdgeInsets.all(10.0),
-                    child: new IntrinsicHeight(
-                      child: new Row(
-                        children: <Widget>[
-                          new Image.network(
-                            item.coverUrl,
-                            width: 70.0,
-                            height: 70.0,
-                          ),
-                          new Expanded(
-                              child: new Container(
-                            padding: EdgeInsets.only(left: 10.0),
-                            child: new Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: <Widget>[
-                                new Expanded(
-                                    flex: 1,
-                                    child: new Text(
-                                      item.title,
-                                      maxLines: 2,
-                                      style: TextStyle(
-                                          fontSize: 14,
-                                          decoration: TextDecoration.none),
-                                      overflow: TextOverflow.ellipsis,
-                                      textAlign: TextAlign.start,
-                                    )),
-                                new Text(item.description),
-                              ],
-                            ),
-                          )),
-                          new Text(("+关注"))
-                        ],
-                      ),
-                    )),
-                Divider(
-                  height: 1.0,
-                  indent: 10.0,
-                  endIndent: 10.0,
-                  color: Colors.grey,
-                ),
-              ],
-            );
-          } else if (item is ContentBannerViewModel) {
-            return new Container(
-              padding: EdgeInsets.only(left: 10.0, right: 10.0),
-              child: new Image.network(item.bannerUrl),
-            );
-          } else {
-            return new Text("未知数据");
-          }
-        },
-        itemCount: items.length,
+                ],
+              );
+            } else if (item is ContentBannerViewModel) {
+              return new Container(
+                padding: EdgeInsets.only(left: 10.0, right: 10.0),
+                child: new Image.network(item.bannerUrl),
+              );
+            } else {
+              return new Text("未知数据");
+            }
+          },
+          itemCount: items.length,
+        )
       ),
     );
   }
