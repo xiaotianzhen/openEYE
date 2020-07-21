@@ -9,7 +9,7 @@ class  ConcernCardViewModel{
   String playUrl;
   String category;
   String authorDescription;
-  String videoId;
+  int videoId;
   int collectionCount;
   int shareCount;
   int replyCount;

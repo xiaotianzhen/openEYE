@@ -287,7 +287,8 @@ class _DisCoverPageState extends State<DisCoverPage> {
                                             overflow: TextOverflow.ellipsis,
                                             textAlign: TextAlign.start,
                                           )),
-                                      new Text(item.description),
+
+                                      item.description!=null? new Text(item.description): new Text(""),
                                     ],
                                   ),
                                 )),
@@ -395,22 +396,25 @@ class _DisCoverPageState extends State<DisCoverPage> {
   }
 
   void parseVideoSamllCard(VideoSmallCardEntity videoSmallCardEntity) {
-    items.add(new VideoCardViewModel(
-        coverUrl: videoSmallCardEntity.data.cover.detail,
-        videoTime: videoSmallCardEntity.data.duration,
-        title: videoSmallCardEntity.data.title,
-        description: videoSmallCardEntity.data.author.name +
-            " / #" +
-            videoSmallCardEntity.data.category,
-        authorUrl: videoSmallCardEntity.data.author.icon,
-        userDescription: videoSmallCardEntity.data.author.description,
-        nickName: videoSmallCardEntity.data.author.name,
-        videoDescription: videoSmallCardEntity.data.description,
-        playerUrl: videoSmallCardEntity.data.playUrl,
-        blurredUrl: videoSmallCardEntity.data.cover.blurred,
-        videoId: videoSmallCardEntity.data.id,
-        collectionCount: videoSmallCardEntity.data.consumption.collectionCount,
-        shareCount: videoSmallCardEntity.data.consumption.shareCount));
+    if(videoSmallCardEntity.data.author!=null){
+      items.add(new VideoCardViewModel(
+          coverUrl: videoSmallCardEntity.data.cover.detail,
+          videoTime: videoSmallCardEntity.data.duration,
+          title: videoSmallCardEntity.data.title,
+          description: videoSmallCardEntity.data.author.name +
+              " / #" +
+              videoSmallCardEntity.data.category,
+          authorUrl: videoSmallCardEntity.data.author.icon,
+          userDescription: videoSmallCardEntity.data.author.description,
+          nickName: videoSmallCardEntity.data.author.name,
+          videoDescription: videoSmallCardEntity.data.description,
+          playerUrl: videoSmallCardEntity.data.playUrl,
+          blurredUrl: videoSmallCardEntity.data.cover.blurred,
+          videoId: videoSmallCardEntity.data.id,
+          collectionCount: videoSmallCardEntity.data.consumption.collectionCount,
+          shareCount: videoSmallCardEntity.data.consumption.shareCount));
+    }
+
   }
 }
 

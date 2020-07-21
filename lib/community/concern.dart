@@ -241,7 +241,7 @@ class _ConcernPagePageState extends State<ConcernPage> {
                 concernEntity.itemList[i].data.content.data.author.description,
             blurredUrl:
                 concernEntity.itemList[i].data.content.data.cover.blurred,
-            videoId: concernEntity.itemList[i].data.content.data.cover.blurred,
+            videoId: concernEntity.itemList[i].data.content.data.id,
           ));
         }
         isLoadingMore=false;
