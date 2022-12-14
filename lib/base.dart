@@ -50,31 +50,28 @@ class _MainPageState extends State<MainPage> {
                 width: 32,
                 height: 32,
               ),
-              title: new Text("首页")),
+              label:"首页"),
           BottomNavigationBarItem(
               icon: new Image.asset(
                 "images/main_community.png",
                 width: 32,
                 height: 32,
               ),
-              title: new Text("社区")),
+              label: "社区"),
           BottomNavigationBarItem(
               icon: new Image.asset(
                 "images/main_notify.png",
                 width: 32,
                 height: 32,
               ),
-              title: new Text("通知")),
+              label: "通知"),
           BottomNavigationBarItem(
               icon: new Image.asset(
                 "images/main_user.png",
                 width: 32,
                 height: 32,
               ),
-              title: new Text(
-                "我的",
-                style: TextStyle(),
-              )),
+              label: "我的"),
         ],
         currentIndex: _currentPageIndex,
         onTap: tap,

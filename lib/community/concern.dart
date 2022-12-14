@@ -22,7 +22,8 @@ class _ConcernPagePageState extends State<ConcernPage> {
   bool isLoadingMore = false;
   final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
   new GlobalKey<RefreshIndicatorState>();
-  var nextPageUrl="";
+  var nextPageUrl = "";
+
   @override
   void initState() {
     super.initState();
@@ -38,162 +39,168 @@ class _ConcernPagePageState extends State<ConcernPage> {
   }
 
 
-  void _updateScrollPosition(){
-    bool isbottom=scrollController.position.pixels==scrollController.position.maxScrollExtent;
-    if(!isRefreshing&&isbottom&&!isLoadingMore){
-           setState(() {
-             isRefreshing=false;
-             isLoadingMore=true;
-             _loadmore();
-          });
+  void _updateScrollPosition() {
+    bool isbottom = scrollController.position.pixels ==
+        scrollController.position.maxScrollExtent;
+    if (!isRefreshing && isbottom && !isLoadingMore) {
+      setState(() {
+        isRefreshing = false;
+        isLoadingMore = true;
+        _loadmore();
+      });
     }
-
   }
 
-  Future<Null> _loadmore() async{
+  Future<Null> _loadmore() async {
     await new Future.delayed(new Duration(seconds: 2));
-      loadData();
-      return null;
+    loadData();
+    return null;
   }
 
-  Future<Null> _handlerRefresh() async{
-       if(!isLoadingMore){
-         setState(() {
-           isLoadingMore=false;
-           isRefreshing=true;
-         });
-       }
-       await new Future.delayed(new Duration(seconds: 1));
-       items.clear();
-       loadData();
-       scrollController.jumpTo(0.0);
-       return null;
+  Future<Null> _handlerRefresh() async {
+    if (!isLoadingMore) {
+      setState(() {
+        isLoadingMore = false;
+        isRefreshing = true;
+      });
+    }
+    await new Future.delayed(new Duration(seconds: 1));
+    items.clear();
+    loadData();
+    scrollController.jumpTo(0.0);
+    return null;
   }
 
   @override
   Widget build(BuildContext context) {
     return new Scaffold(
-      body: new RefreshIndicator(
-        onRefresh: ()=>_handlerRefresh(),
-        child:new ListView.builder(
-          key:_refreshIndicatorKey ,
-          controller: scrollController,
-          physics: const AlwaysScrollableScrollPhysics(),
-        itemBuilder: (BuildContext context, int index) {
-
-          if (index == items.length) {
-            return new Container(
-              alignment: Alignment.center,
-              padding: EdgeInsets.all(5.0),
-              child: new SizedBox(
-                height: 40.0,
-                width: 40.0,
-                child: new Opacity(
-                  opacity: isLoadingMore?1.0:0.0,
-                  child: new CircularProgressIndicator(),
-                ),
-              ),
-            );
-          }
-
-      final ConcernCardViewModel item = items[index];
-      return new Container(
-        padding: EdgeInsets.all(10.0),
-        child: Column(
-          children: <Widget>[
-            new Container(child: new Center(
-              child: new Chewie(
-                new VideoPlayerController.network(item.playUrl),
-                aspectRatio: 16 / 9,
-                autoPlay: !true,
-                looping: true,
-                showControls: true,
-                // 占位图
-                placeholder: new Container(
-                  child: new Image.network(item.coverUrl),
-                ),
-
-                // 是否在 UI 构建的时候就加载视频
-                autoInitialize: !true,
-
-                // 拖动条样式颜色
-                materialProgressColors: new ChewieProgressColors(
-                  playedColor: Colors.red,
-                  handleColor: Colors.blue,
-                  backgroundColor: Colors.grey,
-                  bufferedColor: Colors.lightGreen,
-                ),
-              ),
-            ),),
-            new Row(
-              children: <Widget>[
-                new Image.network(
-                  item.avatarUrl,
-                  width: 30.0,
-                  height: 30.0,
-                ),
-                new Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: <Widget>[
-                    new Container(
-                      padding: EdgeInsets.only(left: 15.0),
-                      child: new Text(item.issureName),
+        body: new RefreshIndicator(
+            onRefresh: () => _handlerRefresh(),
+            child: new ListView.builder(
+              key: _refreshIndicatorKey,
+              controller: scrollController,
+              physics: const AlwaysScrollableScrollPhysics(),
+              itemBuilder: (BuildContext context, int index) {
+                if (index == items.length) {
+                  return new Container(
+                    alignment: Alignment.center,
+                    padding: EdgeInsets.all(5.0),
+                    child: new SizedBox(
+                      height: 40.0,
+                      width: 40.0,
+                      child: new Opacity(
+                        opacity: isLoadingMore ? 1.0 : 0.0,
+                        child: new CircularProgressIndicator(),
+                      ),
                     ),
-                    new Row(
-                      children: <Widget>[
-                        new Container(
-                          padding: EdgeInsets.only(left: 15.0, right: 10.0),
-                          child: new Text(
-                              dateFormate(item.releaseTime) + "发布"),
-                        ),
-                        new Text(item.title)
-                      ],
+                  );
+                }
+
+
+                final ConcernCardViewModel item = items[index];
+                final videoPlayerController = VideoPlayerController.network(
+                    item.playUrl);
+                final controller = ChewieController(
+                    videoPlayerController: videoPlayerController,
+                    aspectRatio: 16 / 9,
+                    autoPlay: !true,
+                    looping: true,
+                    showControls: true,
+                    // 占位图
+                    placeholder: new Container(
+                      child: new Image.network(item.coverUrl),
+                    ),
+
+                    // 是否在 UI 构建的时候就加载视频
+                    autoInitialize: !true,
+
+                    // 拖动条样式颜色
+                    materialProgressColors: new ChewieProgressColors(
+                      playedColor: Colors.red,
+                      handleColor: Colors.blue,
+                      backgroundColor: Colors.grey,
+                      bufferedColor: Colors.lightGreen,
                     )
-                  ],
-                )
-              ],
-            ),
-            new Text(
-              item.description,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-            ),
-            new Row(
-              mainAxisAlignment: MainAxisAlignment.spaceAround,
-              children: <Widget>[
-                new Row(
-                  children: <Widget>[
-                    new Image.asset("images/common_collection.png"),
-                    new Text(item.collectionCount.toString()),
-                  ],
-                ),
-                new Row(
-                  children: <Widget>[
-                    new Image.asset("images/common_collection.png"),
-                    new Text(item.realCollectionCount.toString()),
-                  ],
-                ),
-                new Row(
-                  children: <Widget>[
-                    new Image.asset("images/common_collection.png"),
-                    new Text(item.realCollectionCount.toString()),
-                  ],
-                ),
-                new Row(
-                  children: <Widget>[
-                    new Image.asset("images/common_share.png"),
-                    new Text(item.shareCount.toString()),
-                  ],
-                )
-              ],
-            )
-          ],
-        ),
-      );
-    },
-    itemCount: items == null ? 0 : items.length+1,
-    shrinkWrap: true,
-    )));
+                );
+                return new Container(
+                  padding: EdgeInsets.all(10.0),
+                  child: Column(
+                    children: <Widget>[
+                      new Container(child: new Center(
+                        child: new Chewie(
+                        controller: controller,
+                        ),
+                      ),),
+                      new Row(
+                        children: <Widget>[
+                          new Image.network(
+                            item.avatarUrl,
+                            width: 30.0,
+                            height: 30.0,
+                          ),
+                          new Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: <Widget>[
+                              new Container(
+                                padding: EdgeInsets.only(left: 15.0),
+                                child: new Text(item.issureName),
+                              ),
+                              new Row(
+                                children: <Widget>[
+                                  new Container(
+                                    padding: EdgeInsets.only(
+                                        left: 15.0, right: 10.0),
+                                    child: new Text(
+                                        dateFormate(item.releaseTime) + "发布"),
+                                  ),
+                                  new Text(item.title)
+                                ],
+                              )
+                            ],
+                          )
+                        ],
+                      ),
+                      new Text(
+                        item.description,
+                        overflow: TextOverflow.ellipsis,
+                        maxLines: 2,
+                      ),
+                      new Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: <Widget>[
+                          new Row(
+                            children: <Widget>[
+                              new Image.asset("images/common_collection.png"),
+                              new Text(item.collectionCount.toString()),
+                            ],
+                          ),
+                          new Row(
+                            children: <Widget>[
+                              new Image.asset("images/common_collection.png"),
+                              new Text(item.realCollectionCount.toString()),
+                            ],
+                          ),
+                          new Row(
+                            children: <Widget>[
+                              new Image.asset("images/common_collection.png"),
+                              new Text(item.realCollectionCount.toString()),
+                            ],
+                          ),
+                          new Row(
+                            children: <Widget>[
+                              new Image.asset("images/common_share.png"),
+                              new Text(item.shareCount.toString()),
+                            ],
+                          )
+                        ],
+                      )
+                    ],
+                  ),
+                );
+              },
+              itemCount: items == null ? 0 : items.length + 1,
+              shrinkWrap: true,
+            )));
   }
 
   void loadData() async {
@@ -204,20 +211,20 @@ class _ConcernPagePageState extends State<ConcernPage> {
       };
 
       BaseOptions options =
-          BaseOptions(headers: headers, responseType: ResponseType.plain);
+      BaseOptions(headers: headers, responseType: ResponseType.plain);
       Dio dio = new Dio(options);
       Response response;
-      if(isLoadingMore&&nextPageUrl.isNotEmpty){
-         response = await dio.get(nextPageUrl);
-      }else{
-         response = await dio.get(BaseUrl.concernUrl);
+      if (isLoadingMore && nextPageUrl.isNotEmpty) {
+        response = await dio.get(nextPageUrl);
+      } else {
+        response = await dio.get(BaseUrl.concernUrl);
       }
 
       setState(() {
         String result = response.toString();
         ConcernEntity concernEntity =
-            ConcernEntity.fromJson(json.decode(result));
-        nextPageUrl=concernEntity.nextPageUrl;
+        ConcernEntity.fromJson(json.decode(result));
+        nextPageUrl = concernEntity.nextPageUrl;
         for (int i = 0; i < concernEntity.itemList.length; i++) {
           items.add(new ConcernCardViewModel(
             avatarUrl: concernEntity.itemList[i].data.header.icon,
@@ -225,7 +232,7 @@ class _ConcernPagePageState extends State<ConcernPage> {
             releaseTime: concernEntity.itemList[i].data.header.time,
             title: concernEntity.itemList[i].data.content.data.title,
             description:
-                concernEntity.itemList[i].data.content.data.description,
+            concernEntity.itemList[i].data.content.data.description,
             coverUrl: concernEntity.itemList[i].data.content.data.cover.feed,
             playUrl: concernEntity.itemList[i].data.content.data.playUrl,
             collectionCount: concernEntity
@@ -238,14 +245,14 @@ class _ConcernPagePageState extends State<ConcernPage> {
                 .itemList[i].data.content.data.consumption.shareCount,
             category: concernEntity.itemList[i].data.content.data.category,
             authorDescription:
-                concernEntity.itemList[i].data.content.data.author.description,
+            concernEntity.itemList[i].data.content.data.author.description,
             blurredUrl:
-                concernEntity.itemList[i].data.content.data.cover.blurred,
+            concernEntity.itemList[i].data.content.data.cover.blurred,
             videoId: concernEntity.itemList[i].data.content.data.id,
           ));
         }
-        isLoadingMore=false;
-        isRefreshing=false;
+        isLoadingMore = false;
+        isRefreshing = false;
       });
     } catch (e) {
       print(e);
@@ -253,9 +260,15 @@ class _ConcernPagePageState extends State<ConcernPage> {
   }
 
   String dateFormate(int time) {
-    return DateTime.fromMillisecondsSinceEpoch(time).hour.toString() +
+    return DateTime
+        .fromMillisecondsSinceEpoch(time)
+        .hour
+        .toString() +
         ":" +
-        DateTime.fromMillisecondsSinceEpoch(time).minute.toString();
+        DateTime
+            .fromMillisecondsSinceEpoch(time)
+            .minute
+            .toString();
   }
 }
 

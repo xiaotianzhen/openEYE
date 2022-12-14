@@ -8,10 +8,11 @@
          FlutterApplication and put your custom class here. -->
     <application
         tools:replace="android:label"
-        android:name="io.flutter.app.FlutterApplication"
+        android:name="${applicationName}"
         android:label="open_eye"
         android:icon="@mipmap/ic_launcher">
         <activity
+            android:exported="true"
             android:name=".MainActivity"
             android:launchMode="singleTop"
             android:theme="@style/LaunchTheme"

@@ -42,6 +42,28 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
     var imgHeight = MediaQuery.of(context).size.width * 9.0 / 16;
     var barHeight = MediaQuery.of(context).padding.top;
 
+    final videoPlayerController = VideoPlayerController.network(data.playerUrl);
+    final controller = ChewieController(
+        videoPlayerController: videoPlayerController,
+        aspectRatio: 16 / 9,
+        autoPlay: !true,
+        looping: true,
+        showControls: true,
+        // 占位图
+        placeholder: new Container(
+          child: new Image.network(data.coverUrl),
+        ),
+
+        // 是否在 UI 构建的时候就加载视频
+        autoInitialize: !true,
+
+        // 拖动条样式颜色
+        materialProgressColors: new ChewieProgressColors(
+          playedColor: Colors.red,
+          handleColor: Colors.blue,
+          backgroundColor: Colors.grey,
+          bufferedColor: Colors.lightGreen,
+        ));
     return new Scaffold(
         body: new Column(
       children: <Widget>[
@@ -56,26 +78,7 @@ class _VideoDetailPageState extends State<VideoDetailPage> {
               new Expanded(
                 child: new Center(
                   child: new Chewie(
-                    new VideoPlayerController.network(data.playerUrl),
-                    aspectRatio: 16 / 9,
-                    autoPlay: !true,
-                    looping: true,
-                    showControls: true,
-                    // 占位图
-                    placeholder: new Container(
-                      child: new Image.network(data.coverUrl),
-                    ),
-
-                    // 是否在 UI 构建的时候就加载视频
-                    autoInitialize: !true,
-
-                    // 拖动条样式颜色
-                    materialProgressColors: new ChewieProgressColors(
-                      playedColor: Colors.red,
-                      handleColor: Colors.blue,
-                      backgroundColor: Colors.grey,
-                      bufferedColor: Colors.lightGreen,
-                    ),
+                    controller: controller,
                   ),
                 ),
               )
